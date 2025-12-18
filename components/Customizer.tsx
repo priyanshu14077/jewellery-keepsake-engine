@@ -27,6 +27,33 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
+
+const NavTab = ({ label, color, active, index = 0 }: { label: string; color: string; active?: boolean; index?: number }) => {
+  const shapes = [
+    "polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%)",
+    "polygon(0% 15%, 100% 0%, 85% 100%, 15% 85%)",
+    "polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)",
+    "ellipse(50% 40% at 50% 50%)",
+  ];
+  const fixedShape = shapes[index % shapes.length];
+  
+  return (
+    <div 
+      className={cn(
+        "px-6 py-3 text-white font-black text-sm uppercase tracking-tighter cursor-pointer transition-transform hover:scale-110 active:scale-95 shrink-0 flex items-center justify-center",
+        active ? "scale-105" : "opacity-90"
+      )}
+      style={{ 
+        backgroundColor: color,
+        clipPath: fixedShape,
+        minWidth: '120px'
+      }}
+    >
+      {label}
+    </div>
+  );
+};
+
 export default function Customizer() {
   const { 
     currentStep, 
@@ -41,6 +68,9 @@ export default function Customizer() {
     setCustomerNote,
     totalPrice
   } = useCustomizerStore();
+
+  const stepIndex = ['entry', 'base-selection', 'quantity-selection', 'charm-selection', 'review'].indexOf(currentStep);
+  const stepLabel = currentStep === 'entry' ? 'Start' : `Step ${stepIndex} of 4`;
 
   const handleNext = () => {
     if (currentStep === 'entry') setStep('base-selection');
@@ -57,284 +87,238 @@ export default function Customizer() {
   };
 
   return (
-    <div className="grid lg:grid-cols-2 gap-12 max-w-7xl mx-auto items-start">
-      {/* Left: Interactive Controls */}
-      <div className="space-y-8 animate-in slide-in-from-left duration-700">
-        
-        {/* Step Indicator */}
-        {currentStep !== 'entry' && (
-           <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2 scrollbar-none">
-             {['Base', 'Quantity', 'Charms', 'Review'].map((step, i) => (
-                <div key={step} className="flex items-center gap-2 shrink-0">
-                  <div className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300",
-                    i <= ['base-selection', 'quantity-selection', 'charm-selection', 'review'].indexOf(currentStep)
-                      ? "bg-white text-black ring-4 ring-white/10"
-                      : "bg-zinc-800 text-zinc-500"
-                  )}>
-                    {i + 1}
-                  </div>
-                  <span className={cn(
-                    "text-sm font-medium mr-4",
-                    i <= ['base-selection', 'quantity-selection', 'charm-selection', 'review'].indexOf(currentStep) ? "text-white" : "text-zinc-500"
-                  )}>{step}</span>
-                  {i < 3 && <ChevronRight className="w-4 h-4 text-zinc-700 mr-4" />}
-                </div>
-             ))}
+    <div className="min-h-screen bg-[#FFF000] -mt-16 -mx-6">
+      {/* Promo Banner */}
+      <div className="bg-[#FFC0D3] py-2 text-center text-[10px] font-black italic uppercase tracking-widest text-[#FF33C2] border-b-2 border-[#FF33C2]/10">
+         Holiday delivery is no longer guaranteed, but we're hoping for a magic miracle!
+      </div>
+
+      {/* Playful Header */}
+      <div className="bg-[#B169F6] pt-12 pb-6 border-b-4 border-black/10">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col items-center gap-6">
+           <h1 className="text-7xl font-black text-white italic tracking-tighter drop-shadow-[5px_5px_0px_rgba(0,0,0,0.2)] scale-y-110">
+             SUSAN ALEXANDRA
+           </h1>
+           <div className="flex items-center gap-2 overflow-x-auto w-full justify-center no-scrollbar pb-4 mt-4">
+             <NavTab label="Shop All" color="#FF3A3A" index={0} />
+             <NavTab label="New" color="#FF8A00" index={1} />
+             <NavTab label="Jewelry" color="#00C2FF" index={2} />
+             <NavTab label="Make Your Own" color="#3AFF33" active index={3} />
+             <NavTab label="Accessories" color="#FF33C2" index={4} />
+             <NavTab label="Pet" color="#FF8A00" index={5} />
+             <NavTab label="Bags" color="#FF3A3A" index={6} />
+             <NavTab label="Home" color="#FF33C2" index={7} />
+             <NavTab label="Judaica" color="#00C2FF" index={8} />
+             <NavTab label="More" color="#3AFF33" index={9} />
            </div>
-        )}
+        </div>
+      </div>
 
-        {/* Dynamic Content Based on Step */}
-        <div className="min-h-[400px]">
-          {currentStep === 'entry' && (
-            <div className="space-y-8 py-12">
-              <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-zinc-400 uppercase tracking-widest">
-                  <Sparkles className="w-3 h-3 text-amber-400" />
-                  Premium Jewelry Experience
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        <div className="grid lg:grid-cols-2 gap-16 items-start">
+          
+          {/* Left: Visual Preview */}
+          <div className="order-2 lg:order-1 flex flex-col items-center gap-8">
+             <div className="w-full">
+                <VisualPreview />
+             </div>
+             {currentStep === 'review' && (
+                <div className="w-full bg-white p-8 rounded-[2rem] border-4 border-orange-400 shadow-xl">
+                   <h3 className="text-2xl font-black text-[#B169F6] mb-4 italic">Your Selection Summary</h3>
+                   <div className="space-y-2">
+                      <div className="flex justify-between text-lg font-bold">
+                         <span>{selectedBaseProduct?.name}</span>
+                         <span>${selectedBaseProduct?.base_price}</span>
+                      </div>
+                      <div className="flex justify-between text-lg font-bold text-zinc-500">
+                         <span>{selectedCharms.filter(i => i.charm).length} Charms</span>
+                         <span>${selectedCharms.reduce((acc, i) => acc + (i.charm?.price || 0), 0)}</span>
+                      </div>
+                      <div className="h-1 bg-zinc-100 my-4 rounded-full" />
+                      <div className="flex justify-between text-3xl font-black text-orange-500 italic">
+                         <span>TOTAL</span>
+                         <span>${totalPrice.toFixed(2)}</span>
+                      </div>
+                   </div>
                 </div>
-                <h1 className="text-6xl font-bold tracking-tight text-white leading-tight">
-                  Craft Your <span className="text-zinc-500">Masterpiece.</span>
-                </h1>
-                <p className="text-lg text-zinc-400 max-w-md leading-relaxed">
-                  Design a unique piece that tells your story. Our high-fidelity customizer lets you visualize every attachment in real-time.
-                </p>
-              </div>
-              <button 
-                onClick={handleNext}
-                className="group relative px-8 py-4 bg-white text-black font-bold rounded-full overflow-hidden transition-all hover:pr-12 active:scale-95"
-              >
-                <span className="relative z-10">Start Creating</span>
-                <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300" />
-              </button>
-            </div>
-          )}
+             )}
+          </div>
 
-          {currentStep === 'base-selection' && (
-            <div className="space-y-6">
-              <h2 className="text-3xl font-bold text-white">Select Your Foundation</h2>
-              <Tabs defaultValue="necklace" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-zinc-900/50 p-1 rounded-xl">
-                  <TabsTrigger value="necklace" className="rounded-lg py-3 data-[state=active]:bg-zinc-800">Necklaces</TabsTrigger>
-                  <TabsTrigger value="bracelet" className="rounded-lg py-3 data-[state=active]:bg-zinc-800">Bracelets</TabsTrigger>
-                </TabsList>
-                {(['necklace', 'bracelet'] as const).map((type) => (
-                  <TabsContent key={type} value={type} className="grid grid-cols-1 gap-3 mt-6">
-                    {BASE_PRODUCTS.filter(p => p.type === type).map((product) => (
-                       <Card 
+          {/* Right: Controls */}
+          <div className="order-1 lg:order-2 space-y-8 lg:pt-12">
+            <div className="space-y-2">
+               <p className="text-[#B169F6] font-black text-xl italic uppercase tracking-tighter">
+                 Jewelry ~ {selectedBaseProduct?.type || 'Customizer'}
+               </p>
+               <h2 className="text-6xl font-black text-[#FF33C2] tracking-tighter leading-none italic uppercase">
+                 {currentStep === 'entry' ? 'Make Your Own' : stepLabel}
+               </h2>
+               <p className="text-2xl font-black text-[#B169F6] italic">
+                 {currentStep === 'entry' && 'Design your dream piece ✨'}
+                 {currentStep === 'base-selection' && 'Select Your Foundation'}
+                 {currentStep === 'quantity-selection' && 'How many treasures?'}
+                 {currentStep === 'charm-selection' && 'Curate your magic'}
+                 {currentStep === 'review' && 'Ready to checkout?'}
+               </p>
+            </div>
+
+            <div className="min-h-[400px]">
+              {currentStep === 'entry' && (
+                <div className="py-12 space-y-8">
+                  <div className="bg-white p-8 rounded-[2rem] border-4 border-[#3AFF33] shadow-lg transform -rotate-1">
+                    <p className="text-xl font-bold text-zinc-600 leading-relaxed">
+                      Welcome to the workshop! Pick a base, choose your charms, and place them exactly where you want. No rules, just joy.
+                    </p>
+                  </div>
+                  <button 
+                    onClick={handleNext}
+                    className="w-full py-6 bg-[#FF33C2] text-white font-black text-3xl italic rounded-full shadow-[8px_8px_0px_0px_#B169F6] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
+                  >
+                    START CREATING →
+                  </button>
+                </div>
+              )}
+
+              {currentStep === 'base-selection' && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 gap-6 h-[500px] overflow-y-auto pr-4 no-scrollbar">
+                    {BASE_PRODUCTS.map((product) => (
+                       <div 
                          key={product.id}
                          onClick={() => selectBaseProduct(product)}
                          className={cn(
-                           "cursor-pointer transition-all duration-300 border-white/5 bg-zinc-900/30 hover:bg-zinc-900/60 overflow-hidden",
-                           selectedBaseProduct?.id === product.id ? "ring-2 ring-white border-transparent" : ""
+                           "group cursor-pointer p-8 bg-white rounded-[2.5rem] border-4 transition-all flex items-center gap-8 shadow-xl hover:-translate-y-1 active:translate-y-0",
+                           selectedBaseProduct?.id === product.id 
+                            ? "border-[#FF33C2] shadow-[12px_12px_0px_0px_#FF33C2]" 
+                            : "border-zinc-100 hover:border-[#FF33C2]/30"
                          )}
                        >
-                         <CardContent className="p-4 flex items-center gap-6">
-                            <div className="w-20 h-20 rounded-xl overflow-hidden bg-zinc-800 flex-shrink-0">
-                               <img src={product.preview_image_url} className="w-full h-full object-cover" />
+                         <div className="w-32 h-32 rounded-3xl bg-[#FFF000]/30 p-4 shrink-0 group-hover:rotate-12 transition-transform">
+                            <img src={product.preview_image_url} className="w-full h-full object-contain drop-shadow-lg" />
+                         </div>
+                         <div className="flex-grow">
+                            <h4 className="text-3xl font-black text-zinc-800 italic uppercase leading-tight tracking-tighter">{product.name}</h4>
+                            <p className="text-xl font-bold text-[#B169F6] mt-2 opacity-80">{product.type}</p>
+                            <div className="mt-4 inline-block px-4 py-2 bg-[#3AFF33] text-black font-black italic rounded-xl text-xl">
+                               ${product.base_price}
                             </div>
-                            <div className="flex-grow">
-                               <h4 className="text-white font-bold">{product.name}</h4>
-                               <p className="text-sm text-zinc-500 mt-1 line-clamp-1">{product.description}</p>
-                               <div className="flex items-center gap-4 mt-3">
-                                  <span className="text-white font-bold">${product.base_price}</span>
-                                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-zinc-400 font-bold uppercase tracking-widest">{product.item_code}</span>
+                         </div>
+                       </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {currentStep === 'quantity-selection' && (
+                <div className="space-y-8">
+                  <div className="grid grid-cols-4 gap-4">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((num) => (
+                      <button
+                        key={num}
+                        onClick={() => {
+                          setCharmQuantity(num);
+                          handleNext();
+                        }}
+                        className={cn(
+                          "aspect-square rounded-full flex items-center justify-center text-3xl font-black transition-all border-4",
+                          charmQuantity === num 
+                            ? "bg-[#3AFF33] text-black border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" 
+                            : "bg-white text-zinc-400 border-zinc-100 hover:border-[#3AFF33] hover:text-black"
+                        )}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {currentStep === 'charm-selection' && (
+                <div className="space-y-8">
+                   <ScrollArea className="h-[500px] pr-4">
+                      <div className="space-y-12">
+                         {selectedCharms.map((item, index) => (
+                            <div key={index} className="space-y-4">
+                               <div className="flex items-center gap-4">
+                                  <div className="w-10 h-10 rounded-full bg-[#B169F6] text-white flex items-center justify-center font-black text-xl italic">
+                                    {index + 1}
+                                  </div>
+                                  <h3 className="text-2xl font-black text-zinc-800 uppercase italic">
+                                    {item.charm?.name || 'Pick a charm'}
+                                  </h3>
+                               </div>
+
+                               <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
+                                  {CHARMS.map(charm => (
+                                     <button
+                                       key={charm.id}
+                                       onClick={() => selectCharm(index, charm)}
+                                       className={cn(
+                                         "aspect-square rounded-xl bg-white border-2 p-2 transition-all hover:scale-110 active:scale-95 flex items-center justify-center",
+                                         item.charm?.id === charm.id ? "border-[#FF33C2] shadow-[4px_4px_0px_0px_#FF33C2]" : "border-zinc-100 hover:border-zinc-200"
+                                       )}
+                                     >
+                                        <img src={charm.thumbnail_url} className="w-full h-full object-contain" />
+                                     </button>
+                                  ))}
                                </div>
                             </div>
-                         </CardContent>
-                       </Card>
-                    ))}
-                  </TabsContent>
-                ))}
-              </Tabs>
-            </div>
-          )}
-
-          {currentStep === 'quantity-selection' && (
-            <div className="space-y-8 py-8">
-              <div className="space-y-4">
-                <h2 className="text-3xl font-bold text-white">Number of Charms</h2>
-                <p className="text-zinc-500">Tell us how many stories you want to attach to your {selectedBaseProduct?.name.toLowerCase()}.</p>
-              </div>
-              
-              <div className="grid grid-cols-4 gap-4">
-                {Array.from({ length: 12 }).map((_, i) => (
-                  <button
-                    key={i + 1}
-                    onClick={() => {
-                      setCharmQuantity(i + 1);
-                      handleNext();
-                    }}
-                    className={cn(
-                      "aspect-square rounded-2xl flex items-center justify-center text-xl font-bold transition-all border ",
-                      charmQuantity === i + 1 
-                        ? "bg-white text-black border-white" 
-                        : "bg-zinc-900/50 text-zinc-500 border-white/5 hover:border-white/20 hover:text-white"
-                    )}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {currentStep === 'charm-selection' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-3xl font-bold text-white">Curate your Charms</h2>
-                <div className="px-3 py-1 rounded-full bg-white/10 text-xs font-bold text-white">
-                  Slot: {selectedCharms.filter(Boolean).length} / {charmQuantity}
+                         ))}
+                      </div>
+                   </ScrollArea>
                 </div>
-              </div>
+              )}
 
-              <ScrollArea className="h-[500px] pr-4">
+              {currentStep === 'review' && (
                 <div className="space-y-8">
-                  {selectedCharms.map((_, index) => (
-                    <div key={index} className="space-y-4 p-6 rounded-3xl bg-zinc-900/40 border border-white/5">
-                      <div className="flex items-center justify-between">
-                         <span className="text-sm font-bold text-zinc-500 flex items-center gap-2">
-                           <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                           Attachment Slot {index + 1}
-                         </span>
-                         {selectedCharms[index] && (
-                           <button 
-                             onClick={() => selectCharm(index, null)}
-                             className="text-[10px] text-red-500 font-bold uppercase tracking-widest hover:underline"
-                           >
-                             Remove
-                           </button>
-                         )}
+                   <div className="bg-white p-8 rounded-[2rem] border-4 border-[#B169F6] space-y-6">
+                      <div className="space-y-2">
+                         <Label className="text-xl font-black text-[#B169F6] italic uppercase">Special Note for Us</Label>
+                         <Input 
+                            placeholder="Tell us something sweet..."
+                            value={customerNote}
+                            onChange={(e) => setCustomerNote(e.target.value)}
+                            className="bg-zinc-50 border-none h-16 rounded-2xl text-xl font-bold p-6 focus:ring-4 focus:ring-[#B169F6]/20 transition-all placeholder:italic"
+                         />
                       </div>
+                   </div>
 
-                      <div className="grid grid-cols-1 gap-4">
-                         <Select onValueChange={(val) => selectCharm(index, CHARMS.find(c => c.id === val) || null)}>
-                            <SelectTrigger className="bg-zinc-950 border-white/10 rounded-xl h-14">
-                               <SelectValue placeholder={selectedCharms[index]?.name || "Choose a charm stone..."} />
-                            </SelectTrigger>
-                            <SelectContent className="bg-zinc-900 border-zinc-800 text-white max-h-[300px]">
-                               {CHARM_CATEGORIES.map(cat => (
-                                 <React.Fragment key={cat.id}>
-                                    <div className="px-3 py-2 text-[10px] font-bold text-zinc-600 uppercase tracking-widest bg-black/20">{cat.name}</div>
-                                    {CHARMS.filter(c => c.category_id === cat.id).map(charm => (
-                                      <SelectItem key={charm.id} value={charm.id} className="focus:bg-zinc-800">
-                                         <div className="flex items-center justify-between w-full min-w-[300px]">
-                                            <span>{charm.name}</span>
-                                            <span className="font-bold text-zinc-400">${charm.price}</span>
-                                         </div>
-                                      </SelectItem>
-                                    ))}
-                                 </React.Fragment>
-                               ))}
-                            </SelectContent>
-                         </Select>
-                      </div>
-                    </div>
-                  ))}
+                   <button className="w-full py-8 bg-[#3AFF33] text-black font-black text-4xl italic rounded-[2rem] shadow-[12px_12px_0px_0px_#B169F6] hover:translate-x-2 hover:translate-y-2 hover:shadow-none transition-all flex flex-col items-center">
+                      ADD TO BAG
+                      <span className="text-xl opacity-60">Total: ${totalPrice.toFixed(2)}</span>
+                   </button>
                 </div>
-              </ScrollArea>
+              )}
             </div>
-          )}
 
-          {currentStep === 'review' && (
-            <div className="space-y-10 py-4 max-w-lg">
-               <div className="space-y-2">
-                 <h2 className="text-3xl font-bold text-white tracking-tight">Final Masterpiece Review</h2>
-                 <p className="text-zinc-500">Everything looks perfect. Anything we should know before we start assembly?</p>
-               </div>
-
-               <div className="space-y-6">
-                  <div className="space-y-4">
-                     <Label className="text-xs font-bold uppercase tracking-widest text-zinc-500 px-1">Note for Us</Label>
-                     <Input 
-                        placeholder="Add a special request (e.g., specific charm spacing)..."
-                        value={customerNote}
-                        onChange={(e) => setCustomerNote(e.target.value)}
-                        className="bg-zinc-900/50 border-white/5 h-16 rounded-2xl focus:ring-1 focus:ring-white transition-all px-6"
-                     />
-                  </div>
-
-                  <div className="p-6 rounded-3xl bg-zinc-900/80 border border-white/10 space-y-4">
-                     <div className="flex justify-between items-center text-sm">
-                        <span className="text-zinc-500">{selectedBaseProduct?.name}</span>
-                        <span className="text-white font-medium">${selectedBaseProduct?.base_price}</span>
-                     </div>
-                     <div className="flex justify-between items-center text-sm">
-                        <span className="text-zinc-500">{selectedCharms.filter(Boolean).length} Charms Attached</span>
-                        <span className="text-white font-medium">
-                          ${selectedCharms.reduce((acc, c) => acc + (c?.price || 0), 0)}
-                        </span>
-                     </div>
-                     <div className="h-px bg-white/5 my-2" />
-                     <div className="flex justify-between items-baseline">
-                        <span className="text-zinc-400 font-bold uppercase text-[10px] tracking-widest">Total Price</span>
-                        <span className="text-3xl font-bold text-white">${totalPrice.toFixed(2)}</span>
-                     </div>
-                  </div>
-               </div>
-
-               <div className="flex gap-4">
-                  <button className="flex-grow group relative px-8 py-5 bg-white text-black font-bold rounded-2xl overflow-hidden transition-all hover:bg-zinc-200 active:scale-95 flex items-center justify-center gap-3 shadow-xl shadow-white/5">
-                    <ShoppingBag className="w-5 h-5" />
-                    <span>Add to Cart</span>
-                    {/* Dynamic Price on Button as requested */}
-                    <span className="px-3 py-1 bg-black text-white text-[10px] rounded-full ml-2">
-                       ${totalPrice.toFixed(2)}
-                    </span>
-                  </button>
-               </div>
-            </div>
-          )}
-        </div>
-
-        {/* Global Navigation Buttons */}
-        {currentStep !== 'entry' && currentStep !== 'review' && (
-          <div className="flex gap-4 pt-8">
-            <Button 
-               variant="outline" 
-               size="lg"
-               onClick={handleBack}
-               className="border-white/10 h-14 px-8 rounded-2xl text-zinc-400 hover:text-white hover:bg-zinc-900"
-            >
-              <ChevronLeft className="w-5 h-5 mr-1" />
-              Back
-            </Button>
-            <button 
-              onClick={handleNext}
-              disabled={currentStep === 'base-selection' && !selectedBaseProduct}
-              className="flex-grow flex items-center justify-center gap-2 bg-white h-14 text-black font-bold rounded-2xl hover:bg-zinc-200 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-            >
-              Continue
-              <ChevronRight className="w-5 h-5" />
-            </button>
+            {/* Navigation Buttons */}
+            {currentStep !== 'entry' && (
+              <div className="flex gap-4 pt-12">
+                <button 
+                   onClick={handleBack}
+                   className="w-20 h-20 rounded-full bg-white border-4 border-zinc-100 flex items-center justify-center text-zinc-400 hover:border-[#FF33C2] hover:text-[#FF33C2] transition-all"
+                >
+                  <ChevronLeft className="w-8 h-8" />
+                </button>
+                <button 
+                  onClick={handleNext}
+                  disabled={currentStep === 'base-selection' && !selectedBaseProduct}
+                  className="flex-grow bg-[#FF33C2] text-white font-black text-3xl italic rounded-full shadow-[8px_8px_0px_0px_rgba(0,0,0,0.1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all disabled:opacity-30 uppercase"
+                >
+                  Next Step →
+                </button>
+              </div>
+            )}
           </div>
-        )}
-        
-        {currentStep === 'review' && (
-          <Button 
-             variant="ghost" 
-             onClick={handleBack}
-             className="text-zinc-500 hover:text-white"
-          >
-             <ChevronLeft className="w-4 h-4 mr-1" />
-             Back to Selection
-          </Button>
-        )}
+        </div>
       </div>
 
-      {/* Right: Visual Preview (Always visible) */}
-      <div className="hidden lg:block">
-        <VisualPreview />
-      </div>
-
-      {/* Floating Info (Optional premium touch) */}
-      <div className="fixed bottom-8 left-8 hidden lg:flex items-center gap-3 p-4 rounded-2xl bg-zinc-900 shadow-2xl ring-1 ring-white/10 max-w-xs animate-in slide-in-from-bottom duration-1000">
-         <div className="w-10 h-10 rounded-full bg-amber-400/10 flex items-center justify-center text-amber-400">
-           <Info className="w-5 h-5" />
+      {/* Footer Fun */}
+      <div className="bg-[#FFC0D3] py-24 mt-24">
+         <div className="max-w-7xl mx-auto px-6 text-center">
+            <h2 className="text-5xl font-black text-[#FF33C2] italic tracking-tighter mb-4">WANT TO BE A JEWELRY DESIGNER?</h2>
+            <p className="text-2xl font-black text-[#B169F6] italic uppercase">Tag us in your creations @susan_alexandra</p>
          </div>
-         <p className="text-[10px] font-medium text-zinc-500 leading-normal uppercase tracking-wide">
-           Every piece is hand-assembled by our master jewelers for peak perfection.
-         </p>
       </div>
     </div>
   );
