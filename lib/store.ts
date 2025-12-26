@@ -5,7 +5,9 @@ import { BaseProduct, Charm, CHARMS } from './mock-data';
 interface CustomizerState {
   currentStep: 'entry' | 'base-selection' | 'quantity-selection' | 'charm-selection' | 'review';
   selectedBaseProduct: BaseProduct | null;
+  material: 'Gold' | 'Silver' | 'Rose Gold';
   charmQuantity: number;
+  currentSlotIndex: number;
   selectedCharms: ({ charm: Charm | null; position: { x: number; y: number } })[];
   customerNote: string;
   totalPrice: number;
@@ -13,7 +15,9 @@ interface CustomizerState {
   // Actions
   setStep: (step: CustomizerState['currentStep']) => void;
   selectBaseProduct: (product: BaseProduct) => void;
+  setMaterial: (material: CustomizerState['material']) => void;
   setCharmQuantity: (quantity: number) => void;
+  setCurrentSlotIndex: (index: number) => void;
   selectCharm: (index: number, charm: Charm | null) => void;
   updateCharmPosition: (index: number, x: number, y: number) => void;
   setCustomerNote: (note: string) => void;
@@ -24,7 +28,9 @@ interface CustomizerState {
 export const useCustomizerStore = create<CustomizerState>((set, get) => ({
   currentStep: 'entry',
   selectedBaseProduct: null,
+  material: 'Gold',
   charmQuantity: 0,
+  currentSlotIndex: 0,
   selectedCharms: [],
   customerNote: '',
   totalPrice: 0,
@@ -36,24 +42,27 @@ export const useCustomizerStore = create<CustomizerState>((set, get) => ({
     get().calculateTotalPrice();
   },
 
+  setMaterial: (material) => set({ material }),
+
   setCharmQuantity: (quantity) => {
     set({ 
       charmQuantity: quantity,
+      currentSlotIndex: 0,
       selectedCharms: Array(quantity).fill(null).map((_, i) => ({
         charm: null,
-        // Default position in a small grid if not set
         position: { x: 0, y: 0 }
       })) 
     });
     get().calculateTotalPrice();
   },
 
+  setCurrentSlotIndex: (index) => set({ currentSlotIndex: index }),
+
   selectCharm: (index, charm) => {
     const charms = [...get().selectedCharms];
     charms[index] = { 
       ...charms[index], 
       charm,
-      // Reset position to center if it's a new selection
       position: charms[index].charm ? charms[index].position : { x: 0, y: 0 }
     };
     set({ selectedCharms: charms });
@@ -70,7 +79,7 @@ export const useCustomizerStore = create<CustomizerState>((set, get) => ({
 
   calculateTotalPrice: () => {
     const { selectedBaseProduct, selectedCharms } = get();
-    let total = selectedBaseProduct?.base_price || 0;
+    let total = selectedBaseProduct?.price || 0;
     
     selectedCharms.forEach((item) => {
       if (item.charm) total += item.charm.price;
@@ -82,7 +91,9 @@ export const useCustomizerStore = create<CustomizerState>((set, get) => ({
   reset: () => set({
     currentStep: 'entry',
     selectedBaseProduct: null,
+    material: 'Gold',
     charmQuantity: 0,
+    currentSlotIndex: 0,
     selectedCharms: [],
     customerNote: '',
     totalPrice: 0,
